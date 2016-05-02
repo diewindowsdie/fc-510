@@ -24,18 +24,17 @@ enum
   MODE_FH,  //frequency high statictic mode
   MODE_FL,  //frequency low statictic mode
   MODE_DF,  //frequency deviation statictic mode
-  //MODE_N    //event counter mode
-  //MODE_GC   //gated counter mode
-  //MODE_CU   //up counter mode
-  //MODE_CD   //down counter mode
   MODES     //modes count
 };
+
+#define MAX_SCALE 8 //max scaling factor
 
 //------------------------- Function prototypes: -----------------------------
 
 void Count_Init(void);       //counter module init
 void Count_Exe(bool t);      //execute count process
 
+void Count_SetFref(long f);  //set reference frequency
 void Count_SetMode(char m);  //set counter mode
 void Count_SetGate(int g);   //set gate time, ms
 void Count_SetAvg(char n);   //set number of averages

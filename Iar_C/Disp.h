@@ -9,7 +9,12 @@
 
 //----------------------------- Constants: -----------------------------------
 
-#define POINT 0x80 //decimal point
+#ifdef LCD16XX
+  #define LCD_SIZE 16       //size of LCD16XX
+#else
+  #define LCD_SIZE 10       //size of LCD10
+#endif
+#define POINT 0x80          //decimal point
 
 //------------------------- Function prototypes: -----------------------------
 

@@ -18,6 +18,7 @@ subdesign FCnt
 	SData				: output;	-- SPI data
 	Mode[2..0]			: input;	-- mode select
 	CpuClk		        : output;	-- CPU clock divider output
+	Fdiv[2..0]			: output;	-- divided reference frequency 
 )
 
 variable
@@ -36,6 +37,7 @@ variable
 	Calib				: dff;		-- reclocked CalibIn
 	IntCnt[INTW-1..0]	: dffe;		-- interpolator counter
 	CntShift[4..0]		: dff;		-- shift counter
+	DivCnt[2..0]		: dff;		-- divider counter
 
 begin
 
@@ -47,6 +49,10 @@ begin
 --------------------------------- CPU clock -----------------------------------
 
 	CpuClk = Fref;					-- CPU clock output
+	DivCnt[].clk = GFref;			-- divider clock
+	DivCnt[].clrn = nReset;			-- divider reset
+	DivCnt[] = DivCnt[]+1;			-- divider counter implementation
+	Fdiv[] = DivCnt[];				-- divider outputs
 
 -------------------------- Input frequency counter ----------------------------
 

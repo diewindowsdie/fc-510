@@ -10,9 +10,9 @@
     <debug>1</debug>
     <settings>
       <name>C-SPY</name>
-      <archiveVersion>6</archiveVersion>
+      <archiveVersion>5</archiveVersion>
       <data>
-        <version>16</version>
+        <version>14</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -578,9 +578,9 @@
     </settings>
     <settings>
       <name>JTAGICE3AVR</name>
-      <archiveVersion>5</archiveVersion>
+      <archiveVersion>4</archiveVersion>
       <data>
-        <version>6</version>
+        <version>5</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -694,10 +694,6 @@
         </option>
         <option>
           <name>OJTAGICE3AVRJtagIcePreserveFlash</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>OJTAGICE3DebuggerAttachToRunningTarget</name>
           <state>0</state>
         </option>
       </data>
@@ -1069,10 +1065,6 @@
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-III\uCOS-III-KA-CSpy.ewplugin</file>
-        <loadFlag>0</loadFlag>
-      </plugin>
-      <plugin>
         <file>$TOOLKIT_DIR$\plugins\Stk600Plugin\Stk600Plugin.ewplugin</file>
         <loadFlag>1</loadFlag>
       </plugin>
@@ -1087,10 +1079,6 @@
       <plugin>
         <file>$EW_DIR$\common\plugins\SymList\SymList.ENU.ewplugin</file>
         <loadFlag>1</loadFlag>
-      </plugin>
-      <plugin>
-        <file>$EW_DIR$\common\plugins\uCProbe\uCProbePlugin.ENU.ewplugin</file>
-        <loadFlag>0</loadFlag>
       </plugin>
     </debuggerPlugins>
   </configuration>
@@ -1102,9 +1090,9 @@
     <debug>1</debug>
     <settings>
       <name>C-SPY</name>
-      <archiveVersion>6</archiveVersion>
+      <archiveVersion>5</archiveVersion>
       <data>
-        <version>16</version>
+        <version>14</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -1670,9 +1658,9 @@
     </settings>
     <settings>
       <name>JTAGICE3AVR</name>
-      <archiveVersion>5</archiveVersion>
+      <archiveVersion>4</archiveVersion>
       <data>
-        <version>6</version>
+        <version>5</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -1786,10 +1774,6 @@
         </option>
         <option>
           <name>OJTAGICE3AVRJtagIcePreserveFlash</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>OJTAGICE3DebuggerAttachToRunningTarget</name>
           <state>0</state>
         </option>
       </data>
@@ -2161,10 +2145,6 @@
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-III\uCOS-III-KA-CSpy.ewplugin</file>
-        <loadFlag>0</loadFlag>
-      </plugin>
-      <plugin>
         <file>$TOOLKIT_DIR$\plugins\Stk600Plugin\Stk600Plugin.ewplugin</file>
         <loadFlag>1</loadFlag>
       </plugin>
@@ -2179,10 +2159,6 @@
       <plugin>
         <file>$EW_DIR$\common\plugins\SymList\SymList.ENU.ewplugin</file>
         <loadFlag>1</loadFlag>
-      </plugin>
-      <plugin>
-        <file>$EW_DIR$\common\plugins\uCProbe\uCProbePlugin.ENU.ewplugin</file>
-        <loadFlag>0</loadFlag>
       </plugin>
     </debuggerPlugins>
   </configuration>
@@ -2194,9 +2170,9 @@
     <debug>1</debug>
     <settings>
       <name>C-SPY</name>
-      <archiveVersion>6</archiveVersion>
+      <archiveVersion>5</archiveVersion>
       <data>
-        <version>16</version>
+        <version>14</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -2762,9 +2738,9 @@
     </settings>
     <settings>
       <name>JTAGICE3AVR</name>
-      <archiveVersion>5</archiveVersion>
+      <archiveVersion>4</archiveVersion>
       <data>
-        <version>6</version>
+        <version>5</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -2878,10 +2854,6 @@
         </option>
         <option>
           <name>OJTAGICE3AVRJtagIcePreserveFlash</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>OJTAGICE3DebuggerAttachToRunningTarget</name>
           <state>0</state>
         </option>
       </data>
@@ -3253,10 +3225,6 @@
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-III\uCOS-III-KA-CSpy.ewplugin</file>
-        <loadFlag>0</loadFlag>
-      </plugin>
-      <plugin>
         <file>$TOOLKIT_DIR$\plugins\Stk600Plugin\Stk600Plugin.ewplugin</file>
         <loadFlag>1</loadFlag>
       </plugin>
@@ -3271,10 +3239,6 @@
       <plugin>
         <file>$EW_DIR$\common\plugins\SymList\SymList.ENU.ewplugin</file>
         <loadFlag>1</loadFlag>
-      </plugin>
-      <plugin>
-        <file>$EW_DIR$\common\plugins\uCProbe\uCProbePlugin.ENU.ewplugin</file>
-        <loadFlag>0</loadFlag>
       </plugin>
     </debuggerPlugins>
   </configuration>

@@ -11,18 +11,9 @@
 //----------------------------- Constants: -----------------------------------
 
 #define N_CALIB    5 //pre- and post- calibrate cycles count
-#define T_GATE  1000 //default gate time, mS
-#define T_PAUSE  100 //default pause time, mS
-#define AVERAGE    1 //default averages number
+#define T_PAUSE  100 //default pause time, ms
 #define MAX_AVG  100 //max number of averages
-#define IFREQ      0 //default IF value
-#define PRESCALE   1 //default prescaler ratio
-#define INT_EN     1 //default interpolator enable
-
 #define NLR       16 //window for non-linear filter, E-1 (±6.25% for NLR = 16)
-#define SCALE      1 //default scale
-
-#define F_REF ((unsigned long long)(F_CLK * 1E6)) //reference frequency, Hz
 
 //Counter states:
 
@@ -41,6 +32,7 @@ enum
 
 //----------------------------- Variables: -----------------------------------
 
+static long Fref;              //reference frequency, x0.1 Hz
 static char Count_N;           //MCU input pulses count
 static int Count_M;            //MCU reference pulses count
 static long Count_Nx;          //total input pulses count
@@ -75,7 +67,7 @@ static bool Interpolate;       //interpolator enable
 //------------------------- Function prototypes: -----------------------------
 
 void Count_Clear(void);        //clear counters
-int Count_Calib(char n);       //calibrate interpolator
+int Count_Calib(void);         //calibrate interpolator
 #pragma vector = TIMER0_OVF_vect
 __interrupt void Timer0(void); //timer 0 overflow interrupt (reference)
 #pragma vector = TIMER1_OVF_vect
@@ -95,18 +87,8 @@ void Count_Init(void)
   TIFR = (1 << TOIE1) | (1 << TOIE0);   //clear pending interrupts
   TIMSK |= (1 << TOIE1) | (1 << TOIE0); //OVF0 and OVF1 interrupts enable
 
-  Mode = MODE_F;             //default mode
-  Count_SetMode(Mode);       //set mode
   Count_ClearStat();         //statistics clear
-
-  T_Gate  = ms2sys(T_GATE);  //load default gate time
   T_Pause = ms2sys(T_PAUSE); //load default pause time
-  Average = AVERAGE;         //load default number of averages
-  IFreq = IFREQ;             //load default IF value
-  Prescale = PRESCALE;       //load default prescaler ratio
-  Interpolate = INT_EN;      //load default interpolator state
-
-  Scale = SCALE;             //default scale
   First = 1;                 //first measure flag set
   State = ST_STOP;           //counter stopped
 }
@@ -130,7 +112,7 @@ void Count_Exe(bool t)
     case ST_PAUSE:            //PAUSE state:
       {
         if(Cnt_Timer) break;  //wait for pause time
-        Cal = Count_Calib(N_CALIB); //pre-calibration
+        Cal = Count_Calib();  //pre-calibration
         Count_Clear();        //counters clear
         Port_GATE_1;          //enable count
         Cnt_Timer = T_Gate;   //load gate interval
@@ -168,7 +150,7 @@ void Count_Exe(bool t)
         {                     //count is over
           Port_LED_0;         //GATE LED off
           Count_Read();       //read counters
-          Cal += Count_Calib(N_CALIB); //post-calibration
+          Cal += Count_Calib(); //post-calibration
           Count_Make();       //calculate frequency
           State = ST_READY;   //switch to READY state
         }
@@ -182,9 +164,9 @@ void Count_Exe(bool t)
     case ST_CALIB:            //CALIB state:
       {
         Port_LED_1;           //GATE LED on
-        Cal = Count_Calib(N_CALIB); //calibration
+        Cal = Count_Calib();  //calibration
         Port_LED_0;           //GATE LED off
-        State = ST_STOP;      //switch to STOP state
+        State = ST_READY;     //switch to STOP state
         break;
       }
     }
@@ -244,23 +226,23 @@ char Get_CPLD(void)
 
 //------------------------ Calibrate interpolator: ---------------------------
 
-int Count_Calib(char n)
+int Count_Calib(void)
 {
   signed char d;
   int cal = 0;
-  for(char i = 0; i < n; i++)
+  for(char i = 0; i < N_CALIB; i++)
   {
     Count_Clear();  //counters clear
 
     Port_CALIB_1;   //start calibrate
-    Delay_us(25);   //delay for interpolator
+    Delay_us(50);   //delay for interpolator
     Port_CALIB_0;   //stop calibrate
-    Delay_us(25);   //delay for interpolator
+    Delay_us(50);   //delay for interpolator
 
     Port_FSYNC_0;
     d = Get_CPLD(); //dummy read M0
     d = Get_CPLD(); //dummy read N0
-    d = Get_CPLD(); //read Cal
+    d = Get_CPLD(); //read interpolator
     Port_FSYNC_1;
     cal += d;       //summ calibration values
   }
@@ -294,9 +276,10 @@ void Count_Read(void)
 void Count_Make(void)
 {
   //Scale pulse number:
-  //2 GHz max * 10 s * 12800000 Hz = 256000000000000000 (3 8D 7E A4 C6 80 00 00)
+  //2 GHz max * 10 s * 128000000 (x0.1 Hz) =
+  //2560000000000000000 (23 86 F2 6F C1 00 00 00)
   int pre = Pin_FDIV? Prescale : 1;
-  long long Nx = (long long)Count_Nx * F_REF * pre;
+  long long Nx = (long long)Count_Nx * Fref * pre;
 
   //save pulse width for duty cycle calculation:
   if(DutyH) PulseH = Count_Mx;
@@ -309,26 +292,37 @@ void Count_Make(void)
   //Calculate total interpolated pulse number, scaled by 100:
   //127 * 100 * 2 * 5 (nom) = 127000
   if(Interpolate && !((Mode == MODE_HI) || (Mode == MODE_LO)))
-    Mx = Mx + ((long)Count_Ix * (100 * 2 * N_CALIB)) / (-Cal);
+    Mx += ((long)Count_Ix * (100 * 2 * N_CALIB)) / (-Cal);
 
-  //frequency calculation (x100 uHz):
-  //2 GHz max with prescaler = 20000000000000 x100 uHz (12 30 9C E5 40 00)
   Freq = 0;
   if((Mode == MODE_HI) || (Mode == MODE_LO) || (Mode == MODE_P))
+  //period calculation, ps:
+  //10 s max = 10 000 000 000 000 (9 18 4E 72 A0 00)
   {
-    //calculate pulse width:
-    Freq = Mx * 100000000 / (long long)Count_Nx / F_REF / pre;
+    long pm = 1000;
+    if(Nx)
+    {
+      while(Mx < (0x7FFFFFFFFFFFFFFF / 1000000000) && pm > 1)
+      {
+        Mx = Mx * 10;
+        pm = pm / 10;
+      }
+      Freq = Mx * 100000000 / Nx * pm;
+    }
   }
+  //frequency calculation, uHz
+  //2 GHz max with prescaler = 2 000 000 000 000 000 uHz (7 1A FD 49 8D 00 00)
   else
   {
-    if(Nx && Mx)
+    long pm = 10000000;
+    if(Mx)
     {
-           if(Nx < 0x7FFFFFFFFFFFFFFF / 1000000) Freq = Nx * 1000000 / Mx;
-      else if(Nx < 0x7FFFFFFFFFFFFFFF / 100000)  Freq = Nx * 100000 / Mx * 10;
-      else if(Nx < 0x7FFFFFFFFFFFFFFF / 10000)   Freq = Nx * 10000 / Mx * 100;
-      else if(Nx < 0x7FFFFFFFFFFFFFFF / 1000)    Freq = Nx * 1000 / Mx * 1000;
-      else if(Nx < 0x7FFFFFFFFFFFFFFF / 100)     Freq = Nx * 100 / Mx * 10000;
-      else                                       Freq = Nx * 10 / Mx * 100000;
+      while(Nx < (0x7FFFFFFFFFFFFFFF / 10) && pm > 1)
+      {
+        Nx = Nx * 10;
+        pm = pm / 10;
+      }
+      Freq = Nx / Mx * pm;
     }
   }
   //statistics:
@@ -351,6 +345,13 @@ void PresetFilter(long v)
 //----------------------------------------------------------------------------
 //------------------------- Interface functions: -----------------------------
 //----------------------------------------------------------------------------
+
+//----------------------- Set reference frequency: ---------------------------
+
+void Count_SetFref(long f)
+{
+  Fref = f;
+}
 
 //-------------------------- Set counter mode: -------------------------------
 
@@ -411,7 +412,7 @@ void Count_SetScale(char s)
 {
   s = s & 0x0F;
   if(s < 1) s = 1;
-  if(s > 7) s = 7;
+  if(s > MAX_SCALE) s = MAX_SCALE;
   Scale = s;
 }
 
@@ -469,13 +470,31 @@ void Count_ClearStat(void)
 
 //------------------------ Read counter result: ------------------------------
 
-//0.0000000 Scale = 1 Res = 100 uHz F = Freq / 1
-//0000000.0 Scale = 7 Res = 100 Hz  F = Freq / 1000000
+//8-dig:
+//0.0000000  Scale = 2 Res = 100 uHz F = Freq / 100
+//0000000.0  Scale = 8 Res = 100 Hz  F = Freq / 100000000
+//9-dig:
+//0.00000000 Scale = 1 Res = 10 uHz  F = Freq / 10
+//00000000.0 Scale = 8 Res = 100 Hz  F = Freq / 100000000
 
-//0.0000000 Scale = 1 Res = 100 ps P = 100000000000000 / Freq / 1
-//0000000.0 Scale = 7 Res = 100 us P = 100000000000000 / Freq / 1000000
+//8-dig:
+//0.0000000  Scale = 2 Res = 100 ps  P = Per / 100
+//0000000.0  Scale = 8 Res = 100 us  P = Per / 100000000
+//9-dig:
+//0.00000000 Scale = 1 Res = 10 ps   P = Per / 10
+//00000000.0 Scale = 8 Res = 100 us  P = Per / 100000000
 
-const __flash long ScaleTable[] = { 1, 10, 100, 1000, 10000, 100000, 1000000 };
+const __flash long ScaleTable[] =
+{
+  10,
+  100,
+  1000,
+  10000,
+  100000,
+  1000000,
+  10000000,
+  100000000
+};
 
 long Count_GetValue(void)
 {
@@ -485,20 +504,20 @@ long Count_GetValue(void)
   switch(Mode)
   {
   case MODE_F:   //frequency:
-    v = Freq;
+    v = Freq;    //Freq - frequency, uHz
     break;
   case MODE_FIF: //frequency ± IF:
-    v = Freq + (long long)IFreq * 1000000;
+    v = Freq + (long long)IFreq * 100000000;
     break;
   case MODE_P:   //period:
   case MODE_HI:  //high pulse duration:
   case MODE_LO:  //low pulse duration:
-    v = Freq;
+    v = Freq;    //Freq - period, ps
     break;
   case MODE_D:   //duty cycle:
     if(PulseH && PulseL)
     {
-      v = ((long long)PulseH * 10000000 +
+      v = ((long long)PulseH * 1000000000 +
              (PulseL + PulseH) / 2) / (PulseL + PulseH);
     }
     break;

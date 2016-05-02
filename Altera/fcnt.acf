@@ -21,6 +21,9 @@
 --
 CHIP fcnt
 BEGIN
+	|Fdiv2 :	OUTPUT_PIN = 22;
+	|Fdiv1 :	OUTPUT_PIN = 21;
+	|Fdiv0 :	OUTPUT_PIN = 20;
 	DEVICE = EPM3064ATC44-10;
 	|CpuClk :	OUTPUT_PIN = 6;
 	|nReset :	INPUT_PIN = 14;

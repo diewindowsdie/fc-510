@@ -9,19 +9,15 @@
 
 //----------------------------- Constants: -----------------------------------
 
-#define DBOUNCE_TIME           50 //debounce time, ms
-#define AUTOREPEAT_DELAY      800 //initial autorepeat delay, mS
-#define AUTOREPEAT_SLOW_RATE  180 //slow autorepeat rate, mS
-#define AUTOREPEAT_SLOW_COUNT  16 //slow autorepeat step count
-#define AUTOREPEAT_FAST_RATE   60 //fast autorepeat rate, mS
+#define DBOUNCE_TIME            50 //debounce time, ms
+#define AUTOREPEAT_DELAY       800 //initial autorepeat delay, ms
+#define AUTOREPEAT_SLOW_RATE   180 //slow autorepeat rate, ms
+#define AUTOREPEAT_SLOW_COUNT   16 //fast autorepeat step count
+#define AUTOREPEAT_FAST_RATE    60 //fast autorepeat rate, ms
 
 //------------------------------ Variables: ----------------------------------
 
 static char KeyCode;
-
-//------------------------- Function prototypes: -----------------------------
-
-char Scan(void);
 
 //---------------------------- Keyboard init: --------------------------------
 
@@ -32,7 +28,7 @@ void Keyboard_Init(void)
 
 //---------------------------- Scan keyboard: --------------------------------
 
-char Scan(void)
+char Keyboard_Scan(void)
 {
   char d = 0xEF;
   for(char i = 0; i < 8; i++)
@@ -44,16 +40,7 @@ char Scan(void)
     Port_SCLK_1;
     if(Pin_RETL) d = d | 1;
   }
-  switch(~d & 0x0F)
-  {
-  case 0x01: d = KEY_MN; break; //key "MENU"
-  case 0x02: d = KEY_DN; break; //key "DOWN"
-  case 0x04: d = KEY_UP; break; //key "UP"
-  case 0x06: d = KEY_UD; break; //key "DOWN" + "UP"
-  case 0x08: d = KEY_OK; break; //key "OK"
-  default : d = KEY_NO;
-  }
-  return(d);
+  return(~d & 0x0F);
 }
 
 //-------------------------- Keyboard processing: ----------------------------
@@ -70,7 +57,7 @@ void Keyboard_Exe(bool t)
   {
     if(DbncTimer) DbncTimer--;
     if(RepTimer) RepTimer--;
-    char k = Scan();
+    char k = Keyboard_Scan();
     if(k != LastCode) //new press
     {
       if(k != TempCode) //bounce
@@ -96,15 +83,14 @@ void Keyboard_Exe(bool t)
     {
       if(RepTimer == 1) //repeat timer is over
       {
+        KeyCode = k | REP_R; //autorepeat
         if(RepCnt < AUTOREPEAT_SLOW_COUNT)
         {
-          KeyCode = k | REP_S; //slow autorepeat
           RepTimer = ms2sys(AUTOREPEAT_SLOW_RATE);
           RepCnt++;
         }
         else
         {
-          KeyCode = k | REP_F; //fast autorepeat
           RepTimer = ms2sys(AUTOREPEAT_FAST_RATE);
         }
       }

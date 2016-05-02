@@ -48,9 +48,9 @@ GND                              : 16
 VCCINT                           : 17
 RESERVED                         : 18
 RESERVED                         : 19
-RESERVED                         : 20
-RESERVED                         : 21
-RESERVED                         : 22
+Fdiv0                            : 20
+Fdiv1                            : 21
+Fdiv2                            : 22
 RESERVED                         : 23
 GND                              : 24
 RESERVED                         : 25

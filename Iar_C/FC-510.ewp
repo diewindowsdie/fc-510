@@ -484,7 +484,7 @@
         <option>
           <name>CCOptStrategy</name>
           <version>0</version>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCOptLevel</name>
@@ -3025,6 +3025,9 @@
   </file>
   <file>
     <name>$PROJ_DIR$\Menu.c</name>
+  </file>
+  <file>
+    <name>$PROJ_DIR$\Meter.c</name>
   </file>
   <file>
     <name>$PROJ_DIR$\Port.c</name>

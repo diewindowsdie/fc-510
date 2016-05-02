@@ -11,13 +11,8 @@
 
 //----------------------------- Constants: -----------------------------------
 
-#ifdef LCD16XX
-  #define LCD_SIZE 16      //size of LCD16XX
-#else
-  #define LCD_SIZE 10      //size of LCD10
-#endif
 #define MSG_SIZE 16        //size of message string
-#define DIGITS   10        //number of BCD digits 
+#define DIGITS   10        //number of BCD digits
 
 //------------------------------ Variables: ----------------------------------
 
@@ -67,17 +62,15 @@ void Disp_Init(void)
 {
   LCD_Init();
   Disp_Clear();        //clear display
+  Disp_Update();
 }
 
 //---------------------------- Display update: -------------------------------
 
-static __flash char Str_U[4][4] =
-{
-  {"kHz"}, //frequency units
-  {"mS "}, //period units
-  {"rpm"}, //RPM units
-  {"   "}  //no units
-};
+static __flash char Str_UniF[] = "kHz"; //frequency units
+static __flash char Str_UniP[] = "ms "; //period units
+static __flash char Str_UniR[] = "rpm"; //RPM units
+static __flash char Str_UniN[] = "   "; //no units
 
 void Disp_Update(void)
 {
@@ -91,42 +84,54 @@ void Disp_Update(void)
   {
   case 'f':
   case 'F':
-    Disp_PutString(Str_U[0]);
+  case 'S':
+  case 'C':
+    Disp_PutString(Str_UniF);
     break;
   case 'P':
   case 'H':
   case 'L':
   case 'G':
-    Disp_PutString(Str_U[1]);
+    Disp_PutString(Str_UniP);
     break;
   case 'R':
-    Disp_PutString(Str_U[2]);
+    Disp_PutString(Str_UniR);
     break;
-  default:  
-    Disp_PutString(Str_U[3]);
+  default:
+    Disp_PutString(Str_UniN);
   }
   //load display:
   LCD_Pos(1);
-  char ptr = 0;
+  char s, ptr = 0;
   for(char i = 0; i < LCD_SIZE; i++)
   {
-#ifdef LCD1601  
+#ifdef LCD1601
     if(i == 8) LCD_Pos(9);
 #endif
-    char s = Msg[ptr++];
 #ifdef LCD10
-    if(s == 'f') s = 'F' + POINT;
+    if(ptr == SkipPos) ptr++;
+    if((ptr == SkipPos - 1) && (Msg[SkipPos] == '-'))
+    {
+      s = '-';
+      ptr++;
+    }
+    else
+    {
+      s = Msg[ptr++];
+    }
+    if(i == 0 && s == 'f') s = 'F' + POINT;
     if((ptr < MSG_SIZE) && (Msg[ptr] == '.'))
     {
       s = s + POINT;
       ptr++;
     }
-    if(ptr == SkipPos) s = Msg[ptr++];
+#else
+    s = Msg[ptr++];
 #endif
-    LCD_WrData(s);    
+    LCD_WrData(s);
   }
   Pos = pos;
-  Port_StartTX(); //request to TX 
+  Port_StartTX(); //request to TX
 }
 
 //---------------------------- Clear display: --------------------------------
@@ -138,8 +143,7 @@ void Disp_Clear(void)
   Pos = 0;
 #ifdef LCD10
   SkipPos = MSG_SIZE;
-#endif    
-  Disp_Update();
+#endif
 }
 
 //----------------------------- Set position: --------------------------------
@@ -182,10 +186,15 @@ void Disp_Val(char s, char p, long v)
 {
   char i; bool minus = 0;
   s--; p--; //align to 0..9 range
-  char n = s + 1; //skip one position
+  char n = s;
+#ifdef HI_RES
+  s--; //one more digit
+#else
+  n++; //skip one position
+#endif
 #ifdef LCD10
   SkipPos = s; //save skipped position
-#endif  
+#endif
   if(v < 0) { v = -v; minus = 1; }
   Long2BCD(v, Bcd);
   //check for overflow:
@@ -197,8 +206,10 @@ void Disp_Val(char s, char p, long v)
   if(i != s)
   {
     for(i = s; i < DIGITS; i++)
+    {
       Msg[n++] = '-';
       if(i == p) Msg[n++] = '.'; //insert point
+    }
   }
   //if not overflow, display value:
   else

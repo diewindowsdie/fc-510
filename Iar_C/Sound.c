@@ -9,11 +9,11 @@
 
 //----------------------------- Constants: -----------------------------------
 
-#define TICK_D  30.0 //short tick duration, mS
-#define BEEP_D 100.0 //beep duration, mS
-#define BELL_D 300.0 //error bell duration, mS
+#define TICK_D  30.0 //short tick duration, ms
+#define BEEP_D 100.0 //beep duration, ms
+#define BELL_D 300.0 //error bell duration, ms
 
-#define MS2P(x) (int)(x * 500.0 / T_SYS) //convert mS to timer periods
+#define MS2P(x) (int)(x * 500.0 / T_SYS) //convert ms to timer periods
 
 //------------------------------ Variables: ----------------------------------
 

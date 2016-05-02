@@ -72,8 +72,9 @@ __interrupt void Rx_Int(void)
   case 'M': code = KEY_MN; break; //"MENU" code
   case 'U': code = KEY_UP; break; //"UP" code
   case 'D': code = KEY_DN; break; //"DOWN" code
-  case 'A': code = KEY_UD; break; //"DOWN" + "UP" ("Auto Scale") code
   case 'K': code = KEY_OK; break; //"OK" code
+  case 'A': code = KEY_UD; break; //"DOWN" + "UP" ("Auto Scale") code
+  case 'C': code = KEY_MK; break; //"MENU" + "OK" ("Calibrate") code
   }
   Keyboard_SetCode(code);  
 }

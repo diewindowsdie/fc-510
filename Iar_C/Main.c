@@ -1,18 +1,10 @@
 //----------------------------------------------------------------------------
 
 //Project:         Frequency Counter FC-510
-//Version:         V1.7
-//Compiler:        IAR EWAVR 6.21
+//Version:         see Main.h file
+//Compiler:        IAR EWAVR 6.12
 //Microcontroller: ATmega8
 //E-mail:          wubblick@yahoo.com
-
-//----------------------------------------------------------------------------
-
-//Fuses: 0xD920
-//SPI Enable          (SPIEN = 0)
-//External clock      (SKSEL3 = 0, SKSEL2 = 0, SKSEL1 = 0, SKSEL0 = 0)
-//Startup 6CK + 65 ms (SUT0 = 0)
-//BOD enabled, 4.0V   (BODLEVEL = 0, BODEN = 0)
 
 //----------------------------------------------------------------------------
 

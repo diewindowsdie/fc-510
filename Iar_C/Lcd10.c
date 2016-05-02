@@ -100,15 +100,16 @@ char Encode(char s)
     _D_ | _E_ | _F_ | _G_,                   //code 17H, character "t"
     _C_ | _D_ | _E_,                         //code 18H, character "u"
     _G_,                                     //code 19H, character -
-    0                                        //code 1AH, character blank  
+    0                                        //code 1AH, character blank
   };
-  
+
   char d = s & 0x7F;         //d <- digit
   bool p = s & 0x80;         //p <- d.7 (point)
   if(d >= '0' && d <= '9') d = d - '0';
-  
+
   switch(d)
   {
+  case 'a':
   case 'A': d = 0x0A; break; //character "A"
   case 'b': d = 0x0B; break; //character "b"
   case 'C': d = 0x0C; break; //character "C"
@@ -124,18 +125,20 @@ char Encode(char s)
   case 'n': d = 0x13; break; //character "n"
   case 'O': d = 0x00; break; //character "O"
   case 'o': d = 0x14; break; //character "o"
-  case 'P': d = 0x15; break; //character "P"
+  case 'P':
+  case 'p': d = 0x15; break; //character "P"
   case 'R':
   case 'r': d = 0x16; break; //character "r"
+  case 'S': d = 0x05; break; //character "S"
   case 't': d = 0x17; break; //character "t"
   case 'u': d = 0x18; break; //character "t"
   case '-': d = 0x19; break; //character "-"
   case ' ': d = 0x1A; break; //character "blank"
   }
-  if(d > 0x1A) d = 0x19;     //character "-" for unknown code
+  if(d > 0x1A) d = 0x1A;     //"blank" for unknown code
   d = Font[d];               //read byte from table
   if(p) d |= _H_;            //add segment H
-  return(d);  
+  return(d);
 }
 
 //----------------------------------------------------------------------------
@@ -160,7 +163,7 @@ void LCD_Pos(char pos)
   LCD_WriteAddres(pos);      //write SG1 address
 }
 
-//---------------------- Write data to LCD (RS = 1): -------------------------
+//-------------------------- Write data to LCD: ------------------------------
 
 void LCD_WrData(char d)
 {

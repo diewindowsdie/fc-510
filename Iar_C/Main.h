@@ -15,23 +15,22 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+//-------------------------- Compilation options: ----------------------------
+
+#ifdef LCD16XX
+  #define HI_RES        //enable high resolution mode (9 digits)
+#endif
+#ifdef LCD1602
+  //#define DIG_DISPLAY   //enable digital level display in dBm
+#endif
+
 //------------------------------- Constants: ---------------------------------
 
-//#define       F_CLK    5.000 //clock frequency, MHz
-//#define	F_CLK   10.000 //clock frequency, MHz
-//#define	F_CLK   12.000 //clock frequency, MHz
-//#define	F_CLK   12.288 //clock frequency, MHz
-#define	F_CLK   12.800 //clock frequency, MHz
-//#define	F_CLK   13.000 //clock frequency, MHz
-//#define	F_CLK   14.400 //clock frequency, MHz
-//#define       F_CLK   15.000 //clock frequency, MHz
-//#define       F_CLK   16.000 //clock frequency, MHz
-//#define	F_CLK   16.368 //clock frequency, MHz
-//#define	F_CLK   16.369 //clock frequency, MHz
-//#define	F_CLK   16.384 //clock frequency, MHz
-//#define	F_CLK   17.500 //clock frequency, MHz
+//Fuses: 0xD920 (external clock) or 0xD924 (internal RC 8 MHz)
 
-#define T_SYS    500.0 //system tick, uS
+#define VERSION   2.1 //firmware version
+#define	F_CLK   8.000 //clock frequency, MHz
+#define T_SYS   500.0 //system tick, us
 
 //----------------------------------------------------------------------------
 //-------------------------------- Ports: ------------------------------------

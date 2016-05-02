@@ -37,7 +37,7 @@
   #define DIG_FIR (DIG_INT / BAR_INT) //level digs FIR points
 #endif
 
-#define ADCSR_VAL ((1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0))
+#define ADCSRA_VAL ((1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0))
 #define ADMUX_VAL ((1 << REFS1) | (1 << REFS0) | (1 << ADLAR))
 #define ADC_START (1 << ADSC)
 
@@ -61,7 +61,7 @@ static bool BarUpdated;   //bar update flag
 
 void Meter_Init(void)
 {
-  ADCSR = ADCSR_VAL;
+  ADCSRA = ADCSRA_VAL;
   BarFilter = BAR_FIR;
   AdcCode = 0;
   BarUpdated = 0;
@@ -105,7 +105,7 @@ void Meter_Exe(bool t)
       AdcCode = 0;
     }
     ADMUX = ADMUX_VAL | (Pin_FDIV? MUX_PRE : MUX_INP);
-    ADCSR |= ADC_START;
+    ADCSRA |= ADC_START;
   }
 }
 

@@ -84,7 +84,7 @@ void Count_Init(void)
   ACSR = (1 << ACD);                    //analog comparator disable
   TCCR0 = (1 << CS02) | (1 << CS01);    //timer 0 <- T0, fall edge
   TCCR1B = (1 << CS12) | (1 << CS11);   //timer 1 <- T1, fall edge
-  TIFR = (1 << TOIE1) | (1 << TOIE0);   //clear pending interrupts
+  TIFR = (1 << TOV1) | (1 << TOV0);     //clear pending interrupts
   TIMSK |= (1 << TOIE1) | (1 << TOIE0); //OVF0 and OVF1 interrupts enable
 
   Count_ClearStat();         //statistics clear

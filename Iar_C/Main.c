@@ -90,7 +90,7 @@ void Main_Timer_Init(void)
 {
   TCCR2 = (1 << WGM21) | (1 << CS22); //timer 2 mode: CTC, CK/64
   OCR2 = (char)(F_CLK * T_SYS / 64.0 - 0.5); //load compare register
-  TIFR = (1 << OCIE2);                //pending interrupts clear
+  TIFR = (1 << OCF2);                 //pending interrupts clear
   TIMSK |= (1 << OCIE2);              //compare interrupt enable
   fTick = 1;                          //force update
 }

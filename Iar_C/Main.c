@@ -26,7 +26,7 @@ void Main_Rst_Wdt(bool t);        //watchdog timer restart
 void Main_Ports_Init(void);       //ports init
 void Main_Timer_Init(void);       //system timer init
 bool Main_GetTick(void);          //get new tick
-#pragma vector = TIMER2_COMP_vect
+#pragma vector = TIMER2_COMPA_vect
 __interrupt void Timer(void);     //system timer interrupt
 
 //----------------------------------------------------------------------------
@@ -60,8 +60,8 @@ void main(void)
 void Main_Wdt_Init(void)
 {
   __watchdog_reset();
-  WDTCR = (1 << WDCE) | (1 << WDE);
-  WDTCR = (1 << WDE) | (1 << WDP2) | (1 << WDP1); //1 s
+  WDTCSR = (1 << WDCE) | (1 << WDE);
+  WDTCSR = (1 << WDE) | (1 << WDP2) | (1 << WDP1); //1 s
 }
 
 //------------------------ Watchdog timer restart: ---------------------------
@@ -88,10 +88,11 @@ void Main_Ports_Init(void)
 
 void Main_Timer_Init(void)
 {
-  TCCR2 = (1 << WGM21) | (1 << CS22); //timer 2 mode: CTC, CK/64
-  OCR2 = (char)(F_CLK * T_SYS / 64.0 - 0.5); //load compare register
-  TIFR = (1 << OCF2);                 //pending interrupts clear
-  TIMSK |= (1 << OCIE2);              //compare interrupt enable
+  TCCR2A = (1 << WGM21); //timer 2 mode: CTC
+  TCCR2B = (1 << CS22);  //timer 2 mode: CK/64
+  OCR2A = (char)(F_CLK * T_SYS / 64.0 - 0.5); //load compare register
+  TIFR2 = (1 << OCF2A);
+  TIMSK2 |= (1 << OCIE2A);
   fTick = 1;                          //force update
 }
 
@@ -105,7 +106,7 @@ __monitor bool Main_GetTick(void)
 
 //------------------------ System timer interrupt: ---------------------------
 
-#pragma vector = TIMER2_COMP_vect
+#pragma vector = TIMER2_COMPA_vect
 __interrupt void Timer(void)
 {
   fTick = 1;   //clear timer update flag

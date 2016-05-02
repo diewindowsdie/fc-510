@@ -82,10 +82,12 @@ void PresetFilter(long v);     //preset averaging filter array
 void Count_Init(void)
 {
   ACSR = (1 << ACD);                    //analog comparator disable
-  TCCR0 = (1 << CS02) | (1 << CS01);    //timer 0 <- T0, fall edge
+  TCCR0B = (1 << CS02) | (1 << CS01);   //timer 0 <- T0, fall edge
   TCCR1B = (1 << CS12) | (1 << CS11);   //timer 1 <- T1, fall edge
-  TIFR = (1 << TOV1) | (1 << TOV0);     //clear pending interrupts
-  TIMSK |= (1 << TOIE1) | (1 << TOIE0); //OVF0 and OVF1 interrupts enable
+  TIFR0 = (1 << TOV0);	//clear pending interrupts for timer 0
+  TIFR1 = (1 << TOV1);    //clear pending interrupts for timer 1
+  TIMSK0 = (1 << TOIE0);  //OVF0 interrupts enable
+  TIMSK1 = (1 << TOIE1);  //OVF1 interrupts enable
 
   Count_ClearStat();         //statistics clear
   T_Pause = ms2sys(T_PAUSE); //load default pause time

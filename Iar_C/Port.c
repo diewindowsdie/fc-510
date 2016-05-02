@@ -23,7 +23,7 @@ static char TxPtr;         //TX buffer pointer
 
 //------------------------- Function prototypes: -----------------------------
 
-#pragma vector = USART_RXC_vect
+#pragma vector = USART_RX_vect
 __interrupt void Rx_Int(void); //RX complete interrupt
 
 //----------------------------------------------------------------------------
@@ -34,9 +34,9 @@ __interrupt void Rx_Int(void); //RX complete interrupt
 
 void Port_Init(void)
 {
-  UBRRL = LO(UBRRV);   //set up baud rate
-  UBRRH = HI(UBRRV);
-  UCSRB = (1 << RXCIE) | (1 << RXEN) | (1 << TXEN); //RX, TX enable
+  UBRR0L = LO(UBRRV); 
+  UBRR0H = HI(UBRRV);
+  UCSR0B = (1 << RXCIE0) | (1 << RXEN0) | (1 << TXEN0); //RX, TX enable
   TxPtr = TX_LF + 1;   //do not TX
 }
 
@@ -46,15 +46,15 @@ void Port_Exe(bool t)
 {
   if(t)
   {
-    if(!TxPtr) UDR = Disp_GetChar(TxPtr++);
+    if(!TxPtr) UDR0 = Disp_GetChar(TxPtr++);
     else if(TxPtr <= TX_LF)
     {
-      if(UCSRA & (1 << TXC))
+      if(UCSR0A & (1 << TXC0)) 
       {
-        UCSRA = 1 << TXC; //reset TXC flag
-        if(TxPtr == TX_CR) { UDR = '\r'; TxPtr++; }
-        else if(TxPtr == TX_LF) { UDR = '\n'; TxPtr++; }
-        else UDR = Disp_GetChar(TxPtr++);
+        UCSR0A = 1 << TXC0; //reset TXC flag
+        if(TxPtr == TX_CR) { UDR0 = '\r'; TxPtr++; }
+        else if(TxPtr == TX_LF) { UDR0 = '\n'; TxPtr++; }
+        else UDR0 = Disp_GetChar(TxPtr++);
       }
     }
   }
@@ -62,10 +62,10 @@ void Port_Exe(bool t)
 
 //-------------------------- RX byte via UART: -------------------------------
 
-#pragma vector = USART_RXC_vect
+#pragma vector = USART_RX_vect
 __interrupt void Rx_Int(void)
 {
-  char data = UDR;
+  char data = UDR0;
   char code = KEY_NO;
   switch(data)
   {
